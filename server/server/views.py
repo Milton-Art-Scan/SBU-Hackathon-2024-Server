@@ -3,6 +3,9 @@ from .models import Art
 from .serializers import ArtSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from server import landingLens
+import os
+import tempfile
 
 
 @api_view(['GET', 'POST'])
@@ -74,3 +77,21 @@ def art_detail(request, id, format=None):
     elif request.method == 'DELETE':
         art.delete()
         return Response(status=204)
+
+@api_view(['POST'])
+def scan_art(request, format=None):
+    image_file = request.FILES.get("image")
+    if image_file is None:
+        return Response({'message': 'error uploading image'}, status=400)
+
+    # Create a temporary file that will be deleted when closed
+    temp_file = tempfile.NamedTemporaryFile(delete=False)
+    # Save the uploaded image to the temporary file
+    for chunk in image_file.chunks():
+        temp_file.write(chunk)
+
+    temp_file_path = temp_file.name
+    predictions = landingLens.get_inference(temp_file_path)
+    temp_file.close()
+    print(predictions)
+    return Response({'message': 'Image uploaded successfully'}, status=200)

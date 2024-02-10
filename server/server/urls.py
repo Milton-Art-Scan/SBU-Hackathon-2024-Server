@@ -24,6 +24,7 @@ from django.conf import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/art/', views.art_list),
+    path('api/art/scan/', views.scan_art),
     path('api/art/<int:id>/', views.art_detail),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

@@ -16,7 +16,6 @@ def art_list(request, format=None):
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data, status=201)
-           
 
 @api_view(['GET', 'PUT', 'DELETE'])
 def art_detail(request, id, format=None):

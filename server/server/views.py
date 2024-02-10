@@ -3,6 +3,8 @@ from .models import Art
 from .serializers import ArtSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.shortcuts import render
+
 
 @api_view(['GET', 'POST'])
 def art_list(request, format=None):
@@ -21,12 +23,14 @@ def art_list(request, format=None):
 def art_detail(request, id, format=None):
     try:
         art = Art.objects.get(pk=id)
-        print(art.image.url)
     except Art.DoesNotExist:
         return Response(status=404)
+
+    base_url = request.build_absolute_uri('/')[:-1]
+
     if request.method == 'GET':
         serializer = ArtSerializer(art)
-        return Response(serializer.data)
+        return JsonResponse({"data": serializer.data, "image": "".join((base_url, art.image.url))})
     elif request.method == 'PUT':
         serializer = ArtSerializer(art, data=request.data)
         if serializer.is_valid():

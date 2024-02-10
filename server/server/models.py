@@ -10,5 +10,6 @@ class Art(models.Model):
     description = models.TextField()
     image = models.ImageField(upload_to='art_images')
 
+
     def __str__(self):
         return self.title

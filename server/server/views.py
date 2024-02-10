@@ -21,6 +21,7 @@ def art_list(request, format=None):
 def art_detail(request, id, format=None):
     try:
         art = Art.objects.get(pk=id)
+        print(art.image.url)
     except Art.DoesNotExist:
         return Response(status=404)
     if request.method == 'GET':

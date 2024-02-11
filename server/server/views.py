@@ -4,8 +4,8 @@ from .serializers import ArtSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from server import landingLens
-import os
 import tempfile
+from django.db import connection
 
 
 @api_view(['GET', 'POST'])
@@ -67,7 +67,9 @@ def art_detail(request, id, format=None):
 
     if request.method == 'GET':
         serializer = ArtSerializer(art)
-        return JsonResponse({"data": serializer.data, "image": "".join((base_url, art.image.url))})
+        return JsonResponse({
+            "data": serializer.data,
+            "image": "".join((base_url, art.image.url))})
     elif request.method == 'PUT':
         serializer = ArtSerializer(art, data=request.data)
         if serializer.is_valid():
@@ -80,6 +82,19 @@ def art_detail(request, id, format=None):
 
 @api_view(['POST'])
 def scan_art(request, format=None):
+    """
+    Scan the uploaded image using Landing Lens and query the database for art with the label name.
+
+    Args:
+        request: The HTTP request object.
+        format: The format of the response.
+
+    Returns:
+        A Response object with the result of the scan and query.
+
+    Raises:
+        None.
+    """
     image_file = request.FILES.get("image")
     if image_file is None:
         return Response({'message': 'error uploading image'}, status=400)
@@ -90,8 +105,22 @@ def scan_art(request, format=None):
     for chunk in image_file.chunks():
         temp_file.write(chunk)
 
+    # Scan the image using Landing Lens
     temp_file_path = temp_file.name
     predictions = landingLens.get_inference(temp_file_path)
+    if len(predictions) == 0:
+        return Response({'message': 'no predictions found'}, status=400)
+    max_prediction = max(predictions, key=lambda x: x.score)
+    label_name = max_prediction.label_name
     temp_file.close()
-    print(predictions)
-    return Response({'message': 'Image uploaded successfully'}, status=200)
+
+    # Query the database for art with the label name
+    art = None
+    art = Art.objects.get(title=label_name)
+    serializer = ArtSerializer(art)
+    if art:
+        return Response({'result': serializer.data}, status=200)
+
+    return Response({
+        'message': 'This art piece does not exist in catalog'},
+         status=404)

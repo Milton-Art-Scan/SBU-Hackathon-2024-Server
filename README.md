@@ -6,7 +6,7 @@ This is the server for Milton, an android application for accessing context of a
 
 - [Installation](#installation)
 - [Usage](#usage)
-- [API] (#api)
+- [API](#api)
 
 ## Installation
 

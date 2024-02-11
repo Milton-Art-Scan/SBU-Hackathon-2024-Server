@@ -108,6 +108,7 @@ def scan_art(request, format=None):
         None.
     """
     image_file = request.FILES.get("image")
+    print(request.FILES, image_file, request.data)
     if image_file is None:
         return Response({'message': 'error uploading image'}, status=400)
 
@@ -120,7 +121,7 @@ def scan_art(request, format=None):
     # Scan the image using Landing Lens
     temp_file_path = temp_file.name
     predictions = landingLens.get_inference(temp_file_path)
-    if len(predictions) == 0:
+    if not predictions or len(predictions) == 0:
         return Response({'message': 'no predictions found'}, status=400)
     max_prediction = max(predictions, key=lambda x: x.score)
     label_name = max_prediction.label_name

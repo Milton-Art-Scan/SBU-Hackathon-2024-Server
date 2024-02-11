@@ -1,12 +1,12 @@
 # Milton: Scan Art for Info. A Platform for Artist.
 
-Brief description of the project.
+This is the server for Milton, an android application for accessing context of art pieces by scanning art with Landing Lens by LandingAI.
 
 ## Table of Contents
 
 - [Installation](#installation)
 - [Usage](#usage)
-- [API] (#api docs)
+- [API] (#api)
 
 ## Installation
 

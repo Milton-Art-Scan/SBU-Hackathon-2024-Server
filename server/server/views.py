@@ -7,6 +7,18 @@ from server import landingLens
 import tempfile
 from django.db import connection
 
+import os
+from dotenv import load_dotenv
+from pathlib import Path
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Navigate up two directories to find the .env file
+dotenv_path = os.path.join(current_dir, '..', '..', '.env')
+load_dotenv(dotenv_path=dotenv_path)
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 @api_view(['GET', 'POST'])
 def art_list(request, format=None):
@@ -63,7 +75,7 @@ def art_detail(request, id, format=None):
     except Art.DoesNotExist:
         return Response(status=404)
 
-    base_url = request.build_absolute_uri('/')[:-1]
+    base_url = os.getenv('FORWARD_HOST')
 
     if request.method == 'GET':
         serializer = ArtSerializer(art)
@@ -119,7 +131,11 @@ def scan_art(request, format=None):
     art = Art.objects.get(title=label_name)
     serializer = ArtSerializer(art)
     if art:
-        return Response({'result': serializer.data}, status=200)
+        base_url = os.getenv('FORWARD_HOST')
+        return Response({
+            'result': serializer.data,
+            'image': "".join((base_url, art.image.url))},
+            status=200)
 
     return Response({
         'message': 'This art piece does not exist in catalog'},
